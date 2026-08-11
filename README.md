@@ -57,3 +57,7 @@ python3 example/mnist/mnist_vae.py \
 ```
 
 If you run this on an HPC cluster, you may need to place the command in a Slurm sbatch script or another scheduler-specific job submission script.
+
+For an encoder with no hidden transformation, pass only the input dimension,
+for example `Encoder([128], latent_dim=40)`. The input is then connected
+directly to the mean and log-variance heads.

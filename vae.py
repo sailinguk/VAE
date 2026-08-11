@@ -18,8 +18,8 @@ def _mlp(
     activate_last: bool,
 ) -> nn.Sequential:
     """Create Linear/activation pairs for every adjacent dimension."""
-    if len(dimensions) < 2 or any(size <= 0 for size in dimensions):
-        raise ValueError("dimensions must contain at least two positive integers")
+    if len(dimensions) < 1 or any(size <= 0 for size in dimensions):
+        raise ValueError("dimensions must contain at least one positive integer")
     layers: list[nn.Module] = []
     for index, (in_features, out_features) in enumerate(
         zip(dimensions[:-1], dimensions[1:])
@@ -33,7 +33,9 @@ def _mlp(
 class Encoder(nn.Module):
     """Map a vector to a diagonal Gaussian posterior.
 
-    Example: ``dimensions=[794, 512, 256], latent_dim=20`` creates
+    ``dimensions=[128]`` applies no hidden transformation and connects the
+    input directly to the posterior heads. For example,
+    ``dimensions=[794, 512, 256], latent_dim=20`` creates
     ``794 -> 512 -> 256`` and two ``256 -> 20`` posterior heads.
     """
 
@@ -47,6 +49,8 @@ class Encoder(nn.Module):
         if latent_dim <= 0:
             raise ValueError("latent_dim must be positive")
         self.dimensions = tuple(dimensions)
+        if not self.dimensions:
+            raise ValueError("dimensions must contain the input dimension")
         self.network = _mlp(self.dimensions, activation, activate_last=True)
         self.mean = nn.Linear(self.dimensions[-1], latent_dim)
         self.log_variance = nn.Linear(self.dimensions[-1], latent_dim)
