@@ -42,6 +42,7 @@ def arguments() -> argparse.Namespace:
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cuda")
     parser.add_argument("--data-dir", type=Path, default=PROJECT_ROOT / "data")
     parser.add_argument("--output-dir", type=Path, default=PROJECT_ROOT / "outputs")
+    parser.add_argument("--run-dir", type=Path)
     parser.add_argument("--num-generated", type=int, default=64)
     parser.add_argument("--samples-per-class", type=int, default=8)
     parser.add_argument("--temperature", type=float, default=1.0)
@@ -117,7 +118,9 @@ def main() -> None:
         raise RuntimeError("CUDA was requested but is not available")
     device = torch.device(args.device)
     run_name = "conditional" if args.conditional else "unconditional"
-    output_dir = args.output_dir / run_name
+    output_dir = (
+        args.run_dir if args.run_dir is not None else args.output_dir / run_name
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
 
     transform = transforms.ToTensor()
